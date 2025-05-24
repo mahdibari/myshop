@@ -26,8 +26,8 @@ const startEditing = (id: string, quantity: number) => {
       alert('تعداد باید حداقل 1 باشد');
       return;
     }
-   if (editingItemId && !isNaN(Number(editingItemId))) {
-  updateQuantity(Number(editingItemId), newQuantity);
+ if (editingItemId && !isNaN(Number(editingItemId))) {
+  updateQuantity(editingItemId, newQuantity); // ارسال رشته
   setEditingItemId(null);
 }
   };
