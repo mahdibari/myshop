@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { CheckCircle2, Clock, PackageSearch, Phone } from 'lucide-react';
 
 export default function TrackOrderPage() {
