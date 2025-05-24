@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -11,7 +12,21 @@ import 'swiper/css/pagination';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Percent, Tag } from 'lucide-react';
 
-export default function ProductSwiper({ products, showDiscount = false }) {
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
+  discount_percentage?: number;
+  category?: string;
+}
+
+interface ProductSwiperProps {
+  products: Product[];
+  showDiscount?: boolean;
+}
+
+export default function ProductSwiper({ products, showDiscount = false }: ProductSwiperProps) {
   const { addToCart } = useCart();
 
   return (
@@ -31,9 +46,9 @@ export default function ProductSwiper({ products, showDiscount = false }) {
       className="product-slider"
     >
       {products.map((product) => {
-        const hasDiscount = showDiscount && product.discount_percentage > 0;
+        const hasDiscount = showDiscount && product.discount_percentage && product.discount_percentage > 0;
         const discountedPrice = hasDiscount
-          ? Math.round(product.price * (1 - product.discount_percentage / 100))
+          ? Math.round(product.price * (1 - (product.discount_percentage ?? 0) / 100))
           : product.price;
 
         return (
@@ -107,5 +122,6 @@ export default function ProductSwiper({ products, showDiscount = false }) {
     </Swiper>
   );
 }
+
 
 

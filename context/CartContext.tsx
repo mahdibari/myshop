@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface Product {
-  id: number;
+  id: string;               // تغییر به string
   name: string;
   price: number;
   image_url: string;
@@ -17,9 +17,9 @@ interface CartItem extends Product {
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
+  removeFromCart: (productId: string) => void;   // تغییر به string
   clearCart: () => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number) => void;  // تغییر به string
   totalPrice: number;
 }
 
@@ -40,13 +40,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: string) => {
     setCartItems((prev) => prev.filter(item => item.id !== productId));
   };
 
   const clearCart = () => setCartItems([]);
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     setCartItems((prev) =>
       prev.map(item =>
         item.id === productId ? { ...item, quantity: quantity > 0 ? quantity : 1 } : item
