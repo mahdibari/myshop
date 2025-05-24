@@ -118,16 +118,15 @@ export default function AccountPage() {
           <div className="mt-4 pt-4 border-t text-sm text-gray-700 space-y-2 animate-fade-in-down">
             <p><strong>آدرس ارسال:</strong> {order.address || '-'}</p>
             <ul className="divide-y">
-              {order.items?.length > 0 ? (
-                order.items.map(item => (
-                  <li key={item.id} className="py-2 flex justify-between">
-                    <span>{item.product_name} × {item.quantity}</span>
-                    <span>{item.price.toLocaleString('fa-IR')} تومان</span>
-                  </li>
-                ))
-              ) : (
-                <li>محصولی ثبت نشده</li>
-              )}
+             {order.items?.length && order.items.length > 0 ? (
+  order.items.map(item => (
+    <li key={item.id} className="py-2 flex justify-between">
+      <span>{item.product_name} × {item.quantity}</span>
+    </li>
+  ))
+) : (
+  <li className="py-2">سفارشی ثبت نشده است.</li>
+)}
             </ul>
           </div>
         )}
