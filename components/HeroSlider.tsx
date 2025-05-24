@@ -8,6 +8,7 @@ type Slide = {
   id: string;
   title: string;
   image_url: string;
+ 
   link: string;
   description?: string; // 👈 اضافه کردن فیلد توضیحات
 };
