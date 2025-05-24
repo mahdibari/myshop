@@ -11,10 +11,11 @@ export default function CartPage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState<number>(1);
 
-  const startEditing = (id: string, currentQty: number) => {
-    setEditingItemId(id);
-    setNewQuantity(currentQty);
-  };
+const startEditing = (id: string, quantity: number) => {
+  setEditingItemId(id);
+  setNewQuantity(quantity);
+};
+
 
   const cancelEditing = () => {
     setEditingItemId(null);
@@ -86,16 +87,16 @@ export default function CartPage() {
                   <Trash2 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => startEditing(item.id, item.quantity)}
-                  className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full text-blue-600 transition"
-                  title="ویرایش"
-                >
-                  <Pencil className="w-5 h-5" />
-                </button>
+  onClick={() => startEditing(String(item.id), item.quantity)}
+  className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full text-blue-600 transition"
+  title="ویرایش"
+>
+  <Pencil className="w-5 h-5" />
+</button>
               </div>
 
               {/* مودال ویرایش تعداد */}
-              {editingItemId === item.id && (
+            {editingItemId !== null && editingItemId === String(item.id) && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-white rounded-2xl p-6 w-80 max-w-full shadow-xl animate-fade-in">
                     <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">ویرایش تعداد</h3>
