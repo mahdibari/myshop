@@ -25,10 +25,10 @@ export default function CartPage() {
       alert('تعداد باید حداقل 1 باشد');
       return;
     }
-    if (editingItemId) {
-      updateQuantity(editingItemId, newQuantity);
-      setEditingItemId(null);
-    }
+   if (editingItemId && !isNaN(Number(editingItemId))) {
+  updateQuantity(Number(editingItemId), newQuantity);
+  setEditingItemId(null);
+}
   };
 
   if (cartItems.length === 0) {
