@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// **این خطوط رو حذف کن:**
-// const supabase = createClient(
-//   process.env.SUPABASE_URL!,
-//   process.env.SUPABASE_ANON_KEY!
-// );
-
 export async function POST(request: Request) {
   try {
-    // مطمئن شو که متغیرهای محیطی تعریف شده‌اند
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+    // **اولین تغییر:**
+    // مطمئن شو که متغیرهای محیطی تعریف شده‌اند و از پیشوند NEXT_PUBLIC_ استفاده کن
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       throw new Error('Supabase URL or Anon Key are not defined in environment variables.');
     }
 
     // ایجاد کلاینت Supabase در ابتدای هر درخواست POST
+    // **دومین تغییر:**
+    // از متغیرهای محیطی با پیشوند NEXT_PUBLIC_ استفاده کن
     const supabase = createClient(
-      process.env.SUPABASE_URL, // نیازی به ! نیست چون بالا چک کردی
-      process.env.SUPABASE_ANON_KEY // نیازی به ! نیست چون بالا چک کردی
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
     const authHeader = request.headers.get('Authorization');
@@ -29,11 +26,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'توکن احراز هویت موجود نیست' }, { status: 401 });
     }
 
-    // **این قسمت ایجاد دوباره کلاینت Supabase با هدر Authorisation هم درست هست و باید بمونه**
-    // **اما اولین createClient در بالای فایل باید حذف بشه.**
-    const supabaseWithAuth = createClient( // نام متغیر رو تغییر دادم تا با بالایی قاطی نشه
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY,
+    // **سومین تغییر و اصلاح اصلی در منطق Supabase client:**
+    // این قسمت برای ساخت کلاینت Supabase با توکن احراز هویت است
+    // قبلاً اینجا هم از متغیرهای بدون NEXT_PUBLIC_ استفاده می‌شد
+    // همچنین، به جای ساخت دو `supabase` و `supabaseWithAuth` جداگانه که هر دو از URL/Anon Key استفاده می‌کنند،
+    // منطق بهتری این است که یک بار `supabase` عمومی را بسازید و اگر توکن بود، یک کلاینت جدید با توکن ایجاد کنید.
+    // اما با توجه به اینکه شما از `supabaseWithAuth` برای عملیات‌های بعدی استفاده می‌کنی، این ساختار حفظ می‌شود
+    // فقط متغیرها رو اصلاح می‌کنیم.
+    const supabaseWithAuth = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL, // تغییر یافته
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, // تغییر یافته
       {
         global: {
           headers: {
@@ -51,10 +53,12 @@ export async function POST(request: Request) {
     }
 
     // دریافت کاربر از توکن
-    const { data: { user }, error: userError } = await supabaseWithAuth.auth.getUser(); // از supabaseWithAuth استفاده کن
+    // **اطمینان حاصل کن که از supabaseWithAuth برای عملیات‌های نیازمند احراز هویت استفاده می‌کنی.**
+    const { data: { user }, error: userError } = await supabaseWithAuth.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.json({ message: 'کاربر احراز هویت نشده' }, { status: 401 });
+      console.error('User Auth Error:', userError); // اضافه کردن لاگ برای دیباگ بهتر
+      return NextResponse.json({ message: 'کاربر احراز هویت نشده', detail: userError?.message }, { status: 401 });
     }
 
     // ثبت سفارش به همراه شناسه کاربر
@@ -88,7 +92,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'سفارش با موفقیت ثبت شد' });
   } catch (error: any) {
+    console.error('Catch Block Error:', error); // اضافه کردن لاگ برای دیباگ بهتر
     return NextResponse.json({ message: error.message || 'خطا در ثبت سفارش' }, { status: 500 });
   }
 }
-
