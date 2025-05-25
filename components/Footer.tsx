@@ -20,6 +20,11 @@ export default function Footer() {
                   محصولات
                 </Link>
               </li>
+               <li>
+                <Link href="/trak-order" className="text-gray-400 hover:text-white">
+                  پیگیری سفارش
+                </Link>
+              </li>
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-white">
                   درباره ما
@@ -41,16 +46,7 @@ export default function Footer() {
                   پشتیبانی
                 </Link>
               </li>
-              <li>
-                <Link href="/shipping" className="text-gray-400 hover:text-white">
-                  اطلاعات ارسال
-                </Link>
-              </li>
-              <li>
-                <Link href="/returns" className="text-gray-400 hover:text-white">
-                  مرجوعی
-                </Link>
-              </li>
+              
             </ul>
           </div>
           
