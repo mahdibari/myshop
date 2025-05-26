@@ -53,9 +53,15 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">تماس با ما</h3>
             <ul className="space-y-2 text-gray-400">
-              <li>ایمیل: support@cosmetics.com</li>
-              <li>تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</li>
-              <li>آدرس: تهران، خیابان ولیعصر</li>
+             
+              <li>تلفن: 09224242622-09108416386</li>
+              <li>آدرس:
+                تهران 
+خیابان جمهوری 
+بین سه راه جمهوری و شیخ هادی 
+نبش بن بست شهریار 
+پاساژ علا الدین آرایشی 
+طبقه منفی یک پلاک ۷۶</li>
             </ul>
           </div>
         </div>

@@ -144,16 +144,19 @@ export default function ContactPage() {
 
           <div className="space-y-4 text-gray-700 leading-relaxed">
             <p>
-              <strong>آدرس:</strong> تهران، خیابان انقلاب، پلاک ۱۲۳
+              <strong>آدرس:</strong>تهران 
+خیابان جمهوری 
+بین سه راه جمهوری و شیخ هادی 
+نبش بن بست شهریار 
+پاساژ علا الدین آرایشی 
+طبقه منفی یک پلاک ۷۶
             </p>
             <p>
-              <strong>تلفن:</strong> ۰۲۱-۱۲۳۴۵۶۷۸
+              <strong>تلفن:</strong> 09108416386 - 09224242622
             </p>
+           
             <p>
-              <strong>ایمیل:</strong> info@example.com
-            </p>
-            <p>
-              <strong>ساعات کاری:</strong> شنبه تا چهارشنبه ۹ صبح تا ۵ عصر
+              <strong>ساعات کاری:</strong> شنبه تا چهارشنبه 12 ظهر تا ۵ عصر
             </p>
           </div>
         </section>

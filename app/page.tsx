@@ -69,9 +69,10 @@ export default async function Home() {
       </section>
 
       {/* محصولات ویژه */}
-      <section className="mb-12">
-        <h2 className="text-4xl font-extrabold mb-10 text-pink-600 border-b-4 border-pink-400 pb-2 text-center"> محصولات ویژه </h2>
-        <ProductSwiper products={featured} />
+    
+       <section>
+        <h2 className="text-4xl font-extrabold mb-10 text-pink-600 border-b-4 border-pink-400 pb-2 text-center"> تخفیف های ویژه</h2>
+        <ProductSwiper products={discounted} showDiscount />
       </section>
 
       <section className="mb-12">
@@ -79,9 +80,11 @@ export default async function Home() {
         <ProductSwiper products={popular} />
       </section>
 
-      <section>
-        <h2 className="text-4xl font-extrabold mb-10 text-pink-600 border-b-4 border-pink-400 pb-2 text-center"> تخفیف های ویژه</h2>
-        <ProductSwiper products={discounted} showDiscount />
+   
+
+        <section className="mb-12">
+        <h2 className="text-4xl font-extrabold mb-10 text-pink-600 border-b-4 border-pink-400 pb-2 text-center"> محصولات ویژه </h2>
+        <ProductSwiper products={featured} />
       </section>
     </div>
   );

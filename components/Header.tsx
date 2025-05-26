@@ -40,7 +40,7 @@ export default function Header() {
           {/* بخش راست: لوگو + لینک‌ها در دسکتاپ */}
           <div className="flex items-center gap-6">
             <Link href="/" className="text-2xl font-bold text-pink-600 whitespace-nowrap">
-              فروشگاه لوازم آرایشی
+              Persian Beauty Rose
             </Link>
 
             {/* لینک‌ها در حالت دسکتاپ */}

@@ -20,7 +20,7 @@ export default function SupportPage() {
             <Phone size={36} />
           </div>
           <h3 className="text-xl font-semibold mb-2 text-pink-700">تلفن</h3>
-          <p className="text-gray-600 text-center font-mono">۰۲۱-۱۲۳۴۵۶۷۸</p>
+          <p className="text-gray-600 text-center font-mono">09108416386  09224242622</p>
           <p className="mt-2 text-gray-500 text-sm text-center">پاسخگویی ۹ صبح تا ۵ عصر</p>
         </div>
 
@@ -30,7 +30,7 @@ export default function SupportPage() {
             <Mail size={36} />
           </div>
           <h3 className="text-xl font-semibold mb-2 text-pink-700">ایمیل</h3>
-          <p className="text-gray-600 text-center font-mono">support@example.com</p>
+          <p className="text-gray-600 text-center font-mono">stean.online.1234567@gmail.com</p>
           <p className="mt-2 text-gray-500 text-sm text-center">پاسخگویی در کمتر از ۲۴ ساعت</p>
         </div>
 
