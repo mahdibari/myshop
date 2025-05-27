@@ -38,10 +38,12 @@ export default function CategorySection({ categories }: Props) {
                 cursor-pointer
               "
             >
+
               <div className="relative w-full h-52">
                 <Image
                   src={cat.image_url}
                   alt={cat.name || 'category image'}
+                  
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, 33vw"

@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'; // Using useParams and u
 import { useCart } from '@/context/CartContext'; // Assuming this is a client context
 import { supabase } from '@/lib/supabase'; // Supabase client
 import { toast } from 'react-hot-toast'; // For notifications
+import Image from 'next/image'; // Import Next.js Image component
 import {
   BadgePercent,
   ShoppingCart,
@@ -95,7 +96,7 @@ export default function ProductPage() {
 
   // Handler for adding product to cart
   const handleAddToCart = () => {
-    if (product) {
+    if (product) { // Ensure product is not null
       // Check if product is in stock
       if (product.inventory !== undefined && product.inventory < quantity) {
         toast.error(`تنها ${product.inventory} عدد از این محصول موجود است.`, {
@@ -103,7 +104,8 @@ export default function ProductPage() {
         });
         return;
       }
-      addToCart(product, quantity); // Add product with specified quantity to cart
+      // Fix for the error: Explicitly cast product to Product
+      addToCart(product as Product, quantity); // Add product with specified quantity to cart
       toast.success(`${quantity} عدد از ${product.name} به سبد خرید اضافه شد 🛒`, {
         duration: 2000,
         position: 'bottom-right',
@@ -158,11 +160,13 @@ export default function ProductPage() {
       <div className="grid md:grid-cols-2 gap-10 items-start bg-white rounded-3xl shadow-xl p-8 border border-gray-100 animate-slide-in-up">
         {/* Product Image Section */}
         <div className="w-full h-[450px] rounded-2xl overflow-hidden shadow-2xl relative group transform hover:scale-[1.01] transition-transform duration-500">
-          <img
+          <Image
             src={product.image_url}
-            alt={product.name}
-            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => { e.currentTarget.src = `https://placehold.co/600x450/FCE7F3/BE185D?text=No+Image`; }} // Fallback image
+            alt={product.name} // Added alt prop for accessibility
+            fill // Use fill to make image cover parent, requires parent to be relative
+            className="object-cover group-hover:scale-105 transition-transform duration-500" // w-full h-full is not needed with fill
+            // onError is not a direct prop for next/image. Handle fallback by ensuring src is valid.
+            // If product.image_url could be invalid, consider a conditional src or custom loader.
           />
           {hasDiscount && (
             <span className="absolute top-4 right-4 bg-pink-600 text-white text-sm px-3 py-1 rounded-full shadow-lg flex items-center gap-1 animate-bounce-in">
@@ -316,7 +320,7 @@ export default function ProductPage() {
               <span className="text-gray-600 text-sm mr-2">(3.5 از 5 ستاره بر اساس 25 نظر)</span>
             </div>
             <p className="text-gray-600 italic">
-              "این محصول فوق‌العاده است! پوست من را نرم و درخشان کرد." - سارا ا.
+              &ldquo;این محصول فوق&zwnj;العاده است! پوست من را نرم و درخشان کرد.&rdquo; - سارا ا.
             </p>
             <button className="mt-4 text-pink-600 hover:text-pink-800 font-semibold transition-colors duration-200">
               مشاهده همه نظرات
@@ -327,4 +331,3 @@ export default function ProductPage() {
     </main>
   );
 }
-

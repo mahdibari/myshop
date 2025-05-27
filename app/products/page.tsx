@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
@@ -163,7 +163,7 @@ export default function ProductsPage() {
                 )}
                 {/* Product Image Link */}
                 <Link href={`/products/${product.id}`} className="relative h-52 w-full mb-4 block rounded-xl overflow-hidden shadow-md">
-                  <img
+                  <Image
                     src={product.image_url}
                     alt={product.name}
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"

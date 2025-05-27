@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import ProductSwiper from '@/components/ProductSwiper';
 import PopularBrands from '@/components/PopularBrands';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const revalidate = 0;
 
@@ -55,12 +56,16 @@ export default async function Home() {
             <Link
               key={cat.id}
               href={`/category/${cat.id}`}
+               
               className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
             >
-              <img
+              <Image
                 src={cat.image_url}
                 alt={cat.name}
+                width={100} // ابعاد واقعی تصویر رو اینجا وارد کن
+                height={100} // ابعاد واقعی تصویر رو اینجا وارد کن
                 className="w-20 h-20 rounded-lg object-cover mb-2 shadow"
+                
               />
               <span className="text-sm font-medium text-gray-700">{cat.name}</span>
             </Link>

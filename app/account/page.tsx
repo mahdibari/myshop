@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { FaSignOutAlt, FaBoxOpen, FaCheckCircle, FaClock } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface OrderItem {
   id: string;
@@ -148,7 +149,7 @@ export default function AccountPage() {
           <p><strong>تاریخ عضویت:</strong> {new Date(user.created_at).toLocaleDateString('fa-IR')}</p>
         </div>
         <div className="text-right">
-          <img
+          <Image
             src="/default-avatar.png"
             alt="User Avatar"
             className="w-16 h-16 rounded-full object-cover shadow"
