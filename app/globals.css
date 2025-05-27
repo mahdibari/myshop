@@ -16,14 +16,50 @@
   }
 }
 
+/* app/globals.css یا src/app/globals.css */
+
+/* استایل‌های پایه برای حالت Light Mode (پیش‌فرض) */
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #f0f0f0; /* پس‌زمینه سفید مایل به خاکستری که شما در نظر دارید */
+  color: #333333; /* متن مشکی */
+}
+
+input,
+textarea,
+select {
+  background-color: #ffffff; /* پس‌زمینه فیلدها سفید */
+  color: #000000; /* متن فیلدها مشکی */
+  border: 1px solid #cccccc;
+  /* اضافه کردن ترنزیشن برای تغییرات نرم‌تر */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* استایل‌های خاص برای Dark Mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a; /* پس‌زمینه تیره برای Dark Mode */
+    color: #eeeeee; /* متن روشن برای Dark Mode */
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: #333333; /* پس‌زمینه فیلدها تیره در Dark Mode */
+    color: #ffffff; /* متن فیلدها سفید در Dark Mode */
+    border-color: #555555;
+  }
+
+  /* شما باید هر المان دیگری که در سایت شما وجود دارد و رنگش به هم می‌ریزد (مانند:
+     لینک‌ها (a), دکمه‌ها (button), بخش‌های مختلف (div), هدرها (h1-h6) و غیره) را
+     با توجه به نیازهای طراحی خود در این بلاک مشخص کنید. */
+  a {
+    color: #88bbff; /* رنگ لینک‌ها در Dark Mode */
+  }
+
+  /* اگر تصاویر با پس‌زمینه شفاف دارید و در دارک مد نیاز به تغییر دارند: */
+  img {
+    filter: brightness(0.8) contrast(1.2); /* مثالی برای کمی تیره کردن تصاویر */
+  }
 }
 
 .product-slider {

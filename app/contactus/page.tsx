@@ -152,7 +152,7 @@ export default function ContactPage() {
 طبقه منفی یک پلاک ۷۶
             </p>
             <p>
-              <strong>تلفن:</strong> 09108416386 - 09224242622
+              <strong>تلفن:</strong> 09108416386 - 09224242622 - 09195127466
             </p>
            
             <p>
