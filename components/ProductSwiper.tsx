@@ -103,7 +103,7 @@ export default function ProductSwiper({ products, showDiscount = false }: Produc
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    addToCart(product);
+                     addToCart(product, 1);
                     toast.success(`${product.name} به سبد خرید اضافه شد 🛒`, {
                       duration: 2000,
                       position: 'bottom-right',

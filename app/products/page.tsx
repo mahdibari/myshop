@@ -199,7 +199,7 @@ export default function ProductsPage() {
                       onClick={(e) => {
                         e.preventDefault(); // Prevent default link behavior
                         e.stopPropagation(); // Stop event propagation
-                        addToCart(product); // Add product to cart
+                       addToCart(product, 1);// Add product to cart
                         toast.success(`${product.name} به سبد خرید اضافه شد 🛒`, {
                           duration: 2000,
                           position: 'bottom-right',
