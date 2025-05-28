@@ -166,6 +166,8 @@ export default function ProductsPage() {
                   <Image
                     src={product.image_url}
                     alt={product.name}
+                    width={500} // ابعاد واقعی تصویر رو اینجا وارد کن
+                    height={500}
                     className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => { e.currentTarget.src = `https://placehold.co/400x300/FCE7F3/BE185D?text=No+Image`; }} // Fallback image on error
                   />

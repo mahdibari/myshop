@@ -1,6 +1,6 @@
 'use client'; // This directive makes this component a Client Component
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // Added useCallback
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation'; // Using useParams and useRouter for client-side routing
 import { useCart } from '@/context/CartContext'; // Assuming this is a client context
@@ -18,7 +18,9 @@ import {
   CheckCircle,
   XCircle,
   Star, // For potential ratings/reviews
-  Info // For product details
+  Info, // For product details
+  User, // For user icon in reviews
+  Send // For review submission button
 } from 'lucide-react'; // Importing necessary icons
 
 // Define the Product interface for type safety
@@ -27,7 +29,7 @@ interface Product {
   name: string;
   price: number;
   image_url: string;
-  description?: string; // Made optional
+  description?: string; // This is the "caption" field you mentioned, it's already here
   discount_percentage?: number;
   category?: string; // Made optional
   inventory?: number; // Made optional, assuming it exists for stock check
@@ -35,56 +37,116 @@ interface Product {
   features?: string[]; // Added for more detail
 }
 
-// ProductPage component
+// Define the Review interface for type safety
+interface Review {
+  id: string;
+  product_id: string;
+  user_id: string;
+  user_name?: string; // Assuming you might fetch user's name from auth.users or a profiles table
+  rating: number;
+  comment: string;
+  created_at: string;
+  is_approved: boolean;
+}
+
 export default function ProductPage() {
-  const { id } = useParams(); // Get product ID from URL parameters (client-side)
-  const router = useRouter(); // Initialize Next.js router
-  const { addToCart } = useCart(); // Get addToCart function from CartContext
+  const { id } = useParams();
+  const router = useRouter();
+  const { addToCart } = useCart();
 
   // State for product data, loading, error, and quantity
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1); // State for quantity selector
+  const [quantity, setQuantity] = useState(1);
 
-  // useEffect to fetch product data when component mounts or ID changes
-  useEffect(() => {
-    async function fetchProduct() {
-      if (!id) return; // Do nothing if ID is not available yet
+  // State for reviews
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newReviewRating, setNewReviewRating] = useState(0); // For star rating input
+  const [newReviewComment, setNewReviewComment] = useState(''); // For comment textarea
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null); // To store authenticated user info
 
-      setLoading(true); // Start loading
-      setError(null); // Clear previous errors
-      setProduct(null); // Clear previous product data
+  // Function to fetch product details - extracted for clarity
+  const fetchProductDetails = useCallback(async () => {
+    if (!id) return;
+    setLoading(true); // Set loading for the whole page
+    setError(null);
+    setProduct(null);
+    try {
+      const { data: productData, error: productError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id as string)
+        .single();
 
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', id as string) // Cast id to string
-          .single(); // Fetch a single product
-
-        if (fetchError) {
-          console.error('Error fetching product:', fetchError);
-          setError('محصول مورد نظر یافت نشد یا خطایی رخ داد.');
-          toast.error('خطا در بارگذاری محصول.');
-        } else if (!data) {
-          setError('محصول مورد نظر یافت نشد.');
-          toast.error('محصول مورد نظر یافت نشد.');
-        } else {
-          setProduct(data); // Set product data
-          setQuantity(1); // Reset quantity to 1 when a new product is loaded
-        }
-      } catch (e: any) {
-        console.error('Unexpected error:', e);
-        setError('خطایی غیرمنتظره رخ داد.');
-        toast.error('خطایی غیرمنتظره رخ داد.');
-      } finally {
-        setLoading(false); // End loading
+      if (productError) {
+        console.error('Error fetching product:', productError);
+        setError('محصول مورد نظر یافت نشد یا خطایی رخ داد.');
+        toast.error('خطا در بارگذاری محصول.');
+      } else if (!productData) {
+        setError('محصول مورد نظر یافت نشد.');
+        toast.error('محصول مورد نظر یافت نشد.');
+      } else {
+        setProduct(productData);
+        setQuantity(1);
       }
+    } catch (e: any) {
+      console.error('Unexpected error:', e);
+      setError('خطایی غیرمنتظره رخ داد.');
+      toast.error('خطایی غیرمنتظره رخ داد.');
+    } finally {
+      setLoading(false); // End loading for the whole page
     }
+  }, [id]); // id is a dependency for this function
 
-    fetchProduct(); // Call the fetch function
-  }, [id]); // Dependency array: re-run effect if ID changes
+  // Function to fetch approved reviews for the current product - extracted and made callable
+  const fetchReviewsForProduct = useCallback(async () => {
+    if (!id) return;
+    setReviewError(null); // Clear review-specific errors
+    try {
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('product_reviews')
+        .select(`
+            *,
+            users:user_id (email) // Fetch user email from auth.users table
+          `)
+        .eq('product_id', id as string)
+        .eq('is_approved', true) // Only fetch approved reviews
+        .order('created_at', { ascending: false }); // Order by newest first
+
+      if (reviewsError) {
+        console.error('Error fetching reviews:', reviewsError);
+        setReviewError('خطا در بارگذاری نظرات.');
+      } else {
+        const formattedReviews: Review[] = reviewsData.map((review: any) => ({
+          ...review,
+          user_name: review.users ? review.users.email.split('@')[0] : 'کاربر ناشناس', // Use part of email as username
+        }));
+        setReviews(formattedReviews);
+      }
+    } catch (e: any) {
+      console.error('Unexpected error fetching reviews:', e);
+      setReviewError('خطایی غیرمنتظره در بارگذاری نظرات رخ داد.');
+    }
+  }, [id]); // id is a dependency for this function
+
+  // Main useEffect for initial data load and auth listener
+  useEffect(() => {
+    fetchProductDetails(); // Fetch product details on mount/id change
+    fetchReviewsForProduct(); // Fetch reviews on mount/id change
+
+    // Listen for auth state changes to get current user
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [id, fetchProductDetails, fetchReviewsForProduct]); // Dependencies for initial data fetch and functions
 
   // Calculate final price with discount
   const hasDiscount = product && product.discount_percentage && product.discount_percentage > 0;
@@ -92,20 +154,18 @@ export default function ProductPage() {
     ? hasDiscount
       ? Math.round(product.price * (1 - product.discount_percentage! / 100))
       : product.price
-    : 0; // Default to 0 if product is null
+    : 0;
 
   // Handler for adding product to cart
   const handleAddToCart = () => {
-    if (product) { // Ensure product is not null
-      // Check if product is in stock
+    if (product) {
       if (product.inventory !== undefined && product.inventory < quantity) {
         toast.error(`تنها ${product.inventory} عدد از این محصول موجود است.`, {
           position: 'bottom-right',
         });
         return;
       }
-      // Fix for the error: Explicitly cast product to Product
-      addToCart(product as Product, quantity); // Add product with specified quantity to cart
+      addToCart(product as Product, quantity);
       toast.success(`${quantity} عدد از ${product.name} به سبد خرید اضافه شد 🛒`, {
         duration: 2000,
         position: 'bottom-right',
@@ -114,6 +174,56 @@ export default function ProductPage() {
           secondary: '#FFFFFF',
         },
       });
+    }
+  };
+
+  // Handler for submitting a new review
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewError(null);
+    setIsSubmittingReview(true);
+
+    if (!currentUser) {
+      setReviewError('برای ثبت نظر، لطفاً ابتدا وارد شوید.');
+      setIsSubmittingReview(false);
+      return;
+    }
+    if (!newReviewComment.trim() || newReviewRating === 0) {
+      setReviewError('لطفاً امتیاز و متن نظر خود را وارد کنید.');
+      setIsSubmittingReview(false);
+      return;
+    }
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from('product_reviews')
+        .insert({
+          product_id: id as string,
+          user_id: currentUser.id,
+          rating: newReviewRating,
+          comment: newReviewComment.trim(),
+          is_approved: false, // Reviews need admin approval
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      toast.success('نظر شما با موفقیت ثبت شد و پس از تأیید نمایش داده خواهد شد. ✨', {
+        position: 'bottom-right',
+      });
+      setNewReviewRating(0); // Reset form
+      setNewReviewComment('');
+      
+      // After successful submission, re-fetch reviews to update the list
+      // This will only show the review if it's approved by an admin quickly.
+      fetchReviewsForProduct(); // <--- ADDED: Re-fetch reviews after submission
+    } catch (err: any) {
+      console.error('Error submitting review:', err);
+      setReviewError('خطا در ثبت نظر: ' + err.message);
+      toast.error('خطا در ثبت نظر.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -135,7 +245,7 @@ export default function ProductPage() {
         <h2 className="text-2xl font-bold mb-2">خطا</h2>
         <p className="text-lg">{error || 'محصول مورد نظر یافت نشد.'}</p>
         <button
-          onClick={() => router.back()} // Go back to previous page
+          onClick={() => router.back()}
           className="mt-8 flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white py-3 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-lg"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -162,11 +272,9 @@ export default function ProductPage() {
         <div className="w-full h-[450px] rounded-2xl overflow-hidden shadow-2xl relative group transform hover:scale-[1.01] transition-transform duration-500">
           <Image
             src={product.image_url}
-            alt={product.name} // Added alt prop for accessibility
-            fill // Use fill to make image cover parent, requires parent to be relative
-            className="object-cover group-hover:scale-105 transition-transform duration-500" // w-full h-full is not needed with fill
-            // onError is not a direct prop for next/image. Handle fallback by ensuring src is valid.
-            // If product.image_url could be invalid, consider a conditional src or custom loader.
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {hasDiscount && (
             <span className="absolute top-4 right-4 bg-pink-600 text-white text-sm px-3 py-1 rounded-full shadow-lg flex items-center gap-1 animate-bounce-in">
@@ -248,7 +356,6 @@ export default function ProductPage() {
                 onChange={(e) => {
                   const val = parseInt(e.target.value);
                   if (!isNaN(val) && val >= 1) {
-                    // Limit quantity to inventory if available
                     if (product.inventory !== undefined && val > product.inventory) {
                       setQuantity(product.inventory);
                       toast.error(`حداکثر تعداد موجود ${product.inventory} عدد است.`, { position: 'bottom-right' });
@@ -256,10 +363,10 @@ export default function ProductPage() {
                       setQuantity(val);
                     }
                   } else if (e.target.value === '') {
-                    setQuantity(0); // Allow clearing input
+                    setQuantity(0);
                   }
                 }}
-                onBlur={(e) => { // Reset to 1 if input is empty on blur
+                onBlur={(e) => {
                   if (e.target.value === '' || parseInt(e.target.value) === 0) {
                     setQuantity(1);
                   }
@@ -280,15 +387,15 @@ export default function ProductPage() {
 
           {/* Add to Cart Button */}
           <button
-            onClick={handleAddToCart} // Call the new handler
-            disabled={product.inventory === 0 || loading} // Disable if out of stock or loading
+            onClick={handleAddToCart}
+            disabled={product.inventory === 0 || loading}
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 text-white py-4 rounded-xl text-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.01] animate-fade-in-up delay-400"
           >
             <ShoppingCart className="w-6 h-6" />
             {product.inventory === 0 ? 'ناموجود' : 'افزودن به سبد خرید'}
           </button>
 
-          {/* Product Description */}
+          {/* Product Description (Caption) */}
           <div className="pt-6 border-t border-gray-200 animate-fade-in-up delay-500">
             <h2 className="font-bold text-gray-800 text-xl mb-3">توضیحات محصول:</h2>
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
@@ -296,7 +403,7 @@ export default function ProductPage() {
             </p>
           </div>
 
-          {/* Placeholder for Key Features (if you add this data to Supabase) */}
+          {/* Key Features (if available) */}
           {product.features && product.features.length > 0 && (
             <div className="pt-6 border-t border-gray-200 animate-fade-in-up delay-600">
               <h2 className="font-bold text-gray-800 text-xl mb-3">ویژگی‌های کلیدی:</h2>
@@ -308,23 +415,104 @@ export default function ProductPage() {
             </div>
           )}
 
-          {/* Placeholder for Customer Reviews (future enhancement) */}
+          {/* Customer Reviews Section */}
           <div className="pt-6 border-t border-gray-200 animate-fade-in-up delay-700">
-            <h2 className="font-bold text-gray-800 text-xl mb-3">نظرات مشتریان:</h2>
-            <div className="flex items-center gap-1 text-yellow-500 mb-2">
-              <Star className="w-5 h-5 fill-current" />
-              <Star className="w-5 h-5 fill-current" />
-              <Star className="w-5 h-5 fill-current" />
-              <Star className="w-5 h-5" />
-              <Star className="w-5 h-5" />
-              <span className="text-gray-600 text-sm mr-2">(3.5 از 5 ستاره بر اساس 25 نظر)</span>
+            <h2 className="font-bold text-gray-800 text-xl mb-4">نظرات مشتریان:</h2>
+
+            {/* Display Existing Reviews */}
+            {reviews.length === 0 ? (
+              <p className="text-gray-500 italic">هنوز نظری برای این محصول ثبت نشده است.</p>
+            ) : (
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review.id} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex items-center mb-2">
+                      <User className="w-5 h-5 text-gray-600 ml-2" />
+                      <span className="font-semibold text-gray-800">{review.user_name || 'کاربر ناشناس'}</span>
+                      <span className="text-gray-400 text-sm mr-auto">
+                        {new Date(review.created_at).toLocaleDateString('fa-IR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-yellow-500 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : ''}`} />
+                      ))}
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Review Submission Form */}
+            <div className="mt-8 p-6 bg-pink-50 rounded-lg shadow-inner border border-pink-100">
+              <h3 className="text-xl font-bold text-pink-700 mb-4">نظر خود را ثبت کنید:</h3>
+              {!currentUser ? (
+                // Message if user is not logged in
+                <div className="text-center p-4 bg-yellow-50 text-yellow-800 rounded-md border border-yellow-200">
+                  <p className="font-semibold mb-2">برای ثبت نظر، لطفاً ابتدا وارد شوید.</p>
+                  <Link href="/login" className="text-pink-600 hover:underline font-medium">
+                    ورود / ثبت نام
+                  </Link>
+                </div>
+              ) : (
+                // Review form for logged-in users
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-semibold mb-2">امتیاز شما:</label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((starValue) => (
+                        <Star
+                          key={starValue}
+                          className={`w-8 h-8 cursor-pointer transition-colors duration-200 ${
+                            starValue <= newReviewRating ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                          }`}
+                          onClick={() => setNewReviewRating(starValue)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="reviewComment" className="block text-gray-700 font-semibold mb-2">
+                      متن نظر:
+                    </label>
+                    <textarea
+                      id="reviewComment"
+                      value={newReviewComment}
+                      onChange={(e) => setNewReviewComment(e.target.value)}
+                      rows={4}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+                      placeholder="نظر خود را درباره این محصول بنویسید..."
+                      required
+                    ></textarea>
+                  </div>
+
+                  {reviewError && <p className="text-red-600 text-sm font-medium">{reviewError}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmittingReview}
+                    className="w-full flex items-center justify-center gap-2 bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  >
+                    {isSubmittingReview ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        در حال ارسال...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        ثبت نظر
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
-            <p className="text-gray-600 italic">
-              &ldquo;این محصول فوق&zwnj;العاده است! پوست من را نرم و درخشان کرد.&rdquo; - سارا ا.
-            </p>
-            <button className="mt-4 text-pink-600 hover:text-pink-800 font-semibold transition-colors duration-200">
-              مشاهده همه نظرات
-            </button>
           </div>
         </div>
       </div>
