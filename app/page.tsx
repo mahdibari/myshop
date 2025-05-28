@@ -1,7 +1,7 @@
 import HeroSlider from '@/components/HeroSlider';
 import { supabase } from '@/lib/supabase';
-import ProductSwiper from '@/components/ProductSwiper';
-import PopularBrands from '@/components/PopularBrands';
+import ProductSwiper from '@/components/DynamicProductSwiper';
+
 import Link from 'next/link';
 import Image from 'next/image';
 
