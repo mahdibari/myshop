@@ -40,7 +40,7 @@ export default function Header() {
           {/* بخش راست: لوگو + لینک‌ها در دسکتاپ */}
           <div className="flex items-center gap-6">
             <Link href="/" className="text-2xl font-bold text-pink-600 whitespace-nowrap">
-              Persian Beauty Rose
+              کد اینماد برای تایید شدن : 50314374
             </Link>
 
             {/* لینک‌ها در حالت دسکتاپ */}
