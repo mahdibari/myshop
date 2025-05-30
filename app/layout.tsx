@@ -9,7 +9,7 @@ import { CartProvider } from '@/context/CartContext';
 const vazir = Vazirmatn({ subsets: ['arabic'] });
 
 export const metadata: Metadata = {
-  title: 'فروشگاه لوازم آرایشی',
+  title: '50314374',
   description: 'فروشگاه آنلاین محصولات آرایشی و بهداشتی',
 };
 
