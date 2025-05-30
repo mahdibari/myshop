@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <Toaster position="top-right" />
         </CartProvider>
+        
       </body>
     </html>
   );

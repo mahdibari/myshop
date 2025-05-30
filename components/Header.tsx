@@ -42,6 +42,7 @@ export default function Header() {
             <Link href="/" className="text-2xl font-bold text-pink-600 whitespace-nowrap">
              پرشین بیوتی
             </Link>
+            
 
             {/* لینک‌ها در حالت دسکتاپ */}
             <div className="hidden md:flex items-center gap-5">
